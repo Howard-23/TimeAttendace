@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TimeTec Attendance – Dashboard</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- SheetJS (Excel) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- jsPDF + autoTable (PDF) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <a href="#" class="logo">
+      <i class="fa-solid fa-clock" style="font-size:22px;"></i>
+      <span>TimeTec <strong style="color:var(--primary)">Attendance</strong></span>
+    </a>
+
+    <nav class="nav">
+      <div class="nav-item">
+        <a class="nav-link active" href="#"><i class="fa-solid fa-house"></i> Home</a>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Company <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Company Profile</a>
+          <a href="#">System Settings</a>
+          <a href="#">Organization Structure</a>
+          <a href="#">Work Location Settings</a>
+          <a href="#">Day Type</a>
+          <a href="#">Leave Type</a>
+          <a href="#">Remark / Work Code</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">User <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Manage User</a>
+          <a href="#">Manage System Roles & Admin</a>
+          <a href="#">Hierarchy Chart</a>
+          <a href="#">Manage Approval Rules</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Schedule <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Holiday</a>
+          <a href="#">Clocking Schedule</a>
+          <a href="#">Assign Schedules and Users into Roster</a>
+          <a href="#">Customise User Duty Roster</a>
+          <a href="#">Roster Overview</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Device <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Clocking Options</a>
+          <a href="#">Mobile Clocking › GPS Geofence</a>
+          <a href="#">NFC | Beacons</a>
+          <a href="#">Wifi Access Point</a>
+          <a href="#">Terminal › Webster / Smart DBS</a>
+          <a href="#">Face Enrollment</a>
+          <a href="#">Data Audit List</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Approval</a>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Attendance <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Attendance</a>
+          <a href="#">Export Attendance</a>
+          <a href="#">Health Screening</a>
+          <a href="#">Attendance Work Zone</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Analysis <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Attendance Analysis</a>
+          <a href="#">Work Location Analysis</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a class="nav-link" href="#">Report <i class="fa-solid fa-caret-down"></i></a>
+        <div class="dropdown">
+          <a href="#">Electronic Time Card</a>
+          <a href="#">Daily Attendance Listing</a>
+          <a href="#">Weekly Attendance Listing</a>
+          <a href="#">Attendance Sheet</a>
+          <a href="#">Job Cost Analysis</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="header-right">
+      <div class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+        <i class="fa-solid fa-sun icon" id="iconSun"></i>
+        <div class="toggle-track">
+          <div class="toggle-knob"></div>
+        </div>
+        <i class="fa-solid fa-moon icon" id="iconMoon"></i>
+      </div>
+
+      <div class="clock" id="liveClock">17 Nov 2026 12:16</div>
+      <div class="user-chip">
+        <div class="avatar">AT</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;">API_Test</div>
+          <div style="font-size:11px;color:var(--text-muted);">Qatar Project</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main">
+
+    <div class="page-title">
+      <div>
+        <h1>Workforce Overview</h1>
+        <div class="subtitle">Qatar Project · Tuesday, 17 November 2026</div>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" type="button"><i class="fa-solid fa-users"></i> All Users</button>
+        <button class="filter-btn" type="button"><i class="fa-solid fa-sitemap"></i> Organization</button>
+        <button class="filter-btn" type="button"><i class="fa-solid fa-user"></i> User List</button>
+        <div class="date-picker">
+          <i class="fa-regular fa-calendar"></i>
+          <span>17 Nov 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="stats-grid">
+      <div class="stat-card workrate-card">
+        <div class="label"><i class="fa-solid fa-chart-line"></i> Work Rate</div>
+        <div class="value">92.4%</div>
+        <div class="trend">Benchmark: 90%</div>
+      </div>
+      <div class="stat-card total">
+        <div class="label"><i class="fa-solid fa-users"></i> Total Users</div>
+        <div class="value">48</div>
+        <div class="trend">Active roster</div>
+      </div>
+      <div class="stat-card normal">
+        <div class="label"><i class="fa-solid fa-circle-check"></i> Normal</div>
+        <div class="value">31</div>
+        <div class="trend">On time</div>
+      </div>
+      <div class="stat-card restday">
+        <div class="label"><i class="fa-solid fa-bed"></i> Rest Day</div>
+        <div class="value">6</div>
+        <div class="trend">Scheduled off</div>
+      </div>
+      <div class="stat-card onleave">
+        <div class="label"><i class="fa-solid fa-plane"></i> On Leave</div>
+        <div class="value">4</div>
+        <div class="trend">Approved</div>
+      </div>
+      <div class="stat-card tardiness">
+        <div class="label"><i class="fa-solid fa-clock"></i> Tardiness</div>
+        <div class="value">5</div>
+        <div class="trend">Late In / Early Out</div>
+      </div>
+      <div class="stat-card noclocking">
+        <div class="label"><i class="fa-solid fa-ban"></i> No Clocking</div>
+        <div class="value">1</div>
+        <div class="trend">Missing punch</div>
+      </div>
+      <div class="stat-card absent">
+        <div class="label"><i class="fa-solid fa-user-xmark"></i> Absent</div>
+        <div class="value">1</div>
+        <div class="trend">Unauthorized</div>
+      </div>
+    </div>
+
+    <!-- Attendance Analysis -->
+    <div class="section">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-chart-pie" style="color:var(--primary)"></i> Attendance Analysis</h2>
+        <div class="actions">
+          <button class="btn" type="button" id="btnExportPDF" title="Download PDF report">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn btn-primary" type="button" id="btnExportExcel" title="Download Excel workbook">
+            <i class="fa-solid fa-file-excel"></i> Excel
+          </button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="tabs">
+          <div class="tab active">Overview</div>
+          <div class="tab">Tardiness</div>
+          <div class="tab">On Leave</div>
+          <div class="tab">No Clocking</div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-box">
+            <h3>Attendance Status Distribution</h3>
+            <div class="chart-container">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-box">
+            <h3>Work Rate (Last 7 Days)</h3>
+            <div class="chart-container">
+              <canvas id="workrateChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flexi Dashboard -->
+    <div class="section">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-calendar-week" style="color:var(--purple)"></i> Flexi Dashboard</h2>
+        <div class="actions">
+          <button class="btn" type="button"><i class="fa-solid fa-filter"></i> Filter Users</button>
+          <button class="btn" type="button" id="btnExport" title="Export current view to Excel">
+            <i class="fa-solid fa-download"></i> Export
+          </button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="week-nav" id="weekNav"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Total Work Hours</th>
+                <th>Total Overtime</th>
+                <th>Last Clocking</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>10001005</td>
+                <td>API_Test</td>
+                <td><span class="badge badge-info">Flexi</span></td>
+                <td>7.5 h</td>
+                <td>0.0 h</td>
+                <td>17 Nov 08:12</td>
+                <td><span class="badge badge-success">In / Out</span></td>
+              </tr>
+              <tr>
+                <td>10001012</td>
+                <td>Sara Al-Mansoori</td>
+                <td><span class="badge badge-info">Flexi</span></td>
+                <td>8.2 h</td>
+                <td>0.7 h</td>
+                <td>17 Nov 17:45</td>
+                <td><span class="badge badge-success">In / Out</span></td>
+              </tr>
+              <tr>
+                <td>10001018</td>
+                <td>Mohammed Hassan</td>
+                <td><span class="badge badge-purple">Job Costing</span></td>
+                <td>6.0 h</td>
+                <td>—</td>
+                <td>17 Nov 09:03</td>
+                <td><span class="badge badge-warning">Late In</span></td>
+              </tr>
+              <tr>
+                <td>10001022</td>
+                <td>Fatima Al-Kuwari</td>
+                <td><span class="badge badge-info">Flexi</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td><span class="badge badge-purple">On Leave</span></td>
+              </tr>
+              <tr>
+                <td>10001031</td>
+                <td>James Wilson</td>
+                <td><span class="badge badge-info">Flexi</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td>16 Nov 18:20</td>
+                <td><span class="badge badge-danger">No Clocking</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exceptions + Devices -->
+    <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:20px;">
+      <div class="section" style="margin-bottom:0;">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Today’s Exceptions</h2>
+          <div class="actions">
+            <button class="btn" type="button">View All</button>
+          </div>
+        </div>
+        <div class="section-body" style="padding-top:8px;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mohammed Hassan</td>
+                  <td><span class="badge badge-warning">Late In</span></td>
+                  <td>09:03</td>
+                  <td><button class="btn" type="button" style="padding:3px 8px;font-size:12px;">Review</button></td>
+                </tr>
+                <tr>
+                  <td>James Wilson</td>
+                  <td><span class="badge badge-danger">No Clocking</span></td>
+                  <td>—</td>
+                  <td><button class="btn" type="button" style="padding:3px 8px;font-size:12px;">Review</button></td>
+                </tr>
+                <tr>
+                  <td>Nora Abdullah</td>
+                  <td><span class="badge badge-warning">Early Out</span></td>
+                  <td>15:42</td>
+                  <td><button class="btn" type="button" style="padding:3px 8px;font-size:12px;">Review</button></td>
+                </tr>
+                <tr>
+                  <td>Khalid Al-Thani</td>
+                  <td><span class="badge badge-info">Extended Break</span></td>
+                  <td>13:15–14:05</td>
+                  <td><button class="btn" type="button" style="padding:3px 8px;font-size:12px;">Review</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-bottom:0;">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-server" style="color:var(--info)"></i> Device Status</h2>
+        </div>
+        <div class="section-body">
+          <div class="device-list">
+            <div class="device-item">
+              <div>
+                <div class="name">Main Lobby Terminal</div>
+                <div style="font-size:12px;color:var(--text-muted);">Webster · SN: TT-88421</div>
+              </div>
+              <div class="status" style="color:var(--success);">
+                <span class="dot online"></span> Online
+              </div>
+            </div>
+            <div class="device-item">
+              <div>
+                <div class="name">Office Floor 2</div>
+                <div style="font-size:12px;color:var(--text-muted);">Smart DBS · SN: TT-77103</div>
+              </div>
+              <div class="status" style="color:var(--success);">
+                <span class="dot online"></span> Online
+              </div>
+            </div>
+            <div class="device-item">
+              <div>
+                <div class="name">Warehouse Gate</div>
+                <div style="font-size:12px;color:var(--text-muted);">Hikvision · SN: HK-33912</div>
+              </div>
+              <div class="status" style="color:var(--danger);">
+                <span class="dot offline"></span> Offline
+              </div>
+            </div>
+            <div class="device-item">
+              <div>
+                <div class="name">Mobile GPS Group</div>
+                <div style="font-size:12px;color:var(--text-muted);">12 active users</div>
+              </div>
+              <div class="status" style="color:var(--success);">
+                <span class="dot online"></span> Active
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div>
+      <a href="#">Terms of Use</a> |
+      <a href="#">Privacy Policy</a> |
+      <a href="#">Guarantee</a> |
+      <a href="#">SLA</a>
+      <span style="margin-left:12px;">
+        <a href="#"><i class="fa-brands fa-apple"></i></a>
+        <a href="#"><i class="fa-brands fa-android" style="color:#8bc34a;"></i></a>
+      </span>
+    </div>
+    <div>
+      <a href="#">Notification</a> |
+      <a href="#">New Features</a> |
+      <a href="#">Support</a> |
+      <a href="#">Language</a>
+      <span style="margin-left:16px;opacity:0.7;">© 2026 TimeTec Cloud</span>
+    </div>
+  </footer>
+
+  <!-- App scripts (order matters) -->
+  <script src="js/theme.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
